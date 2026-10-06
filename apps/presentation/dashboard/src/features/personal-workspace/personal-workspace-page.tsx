@@ -1107,7 +1107,7 @@ export function PersonalWorkspacePage({
     if (selection?.kind === "todo") {
       const goal = workspaceGoals.find((goal) => goal.goalId === selection.item.goalId);
       const todo = goal?.agentTodos.find((item) => item.todoId === selection.item.todoId);
-      return goal && todo ? { kind: "todo", item: {
+      return goal && todo ? { kind: "todo", ...(selection.projectedFrom === "goal_work_map" ? { projectedFrom: selection.projectedFrom } : {}), item: {
         ...todo, goalId: goal.goalId, goalTitle: goal.title,
         ownerLabel: goal.agentLanes?.find((lane) => lane.agentId === todo.claimedBy)?.label ?? todo.claimedBy,
       } } : selection;

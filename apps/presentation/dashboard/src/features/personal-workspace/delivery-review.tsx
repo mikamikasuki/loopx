@@ -121,14 +121,15 @@ export function DeliveryReview({ goal, items, userTodos, onSelect, active }: Del
       const item = scopedAttention.find(todo => todo.todoId === id);
       return item ? { kind: "attention", item } : null;
     }
-    // History outside the status window still opens with the projected facts only.
+    // Work-map nodes are projections, even when a matching Todo summary is in
+    // the status payload. They never grant authority to read or mutate Todo detail.
     const currentTodo = goal.agentTodos.find(item => item.todoId === id);
     const todo = currentTodo ?? {
       todoId: id, text: node.title, done: node.state === "done", claimedBy: node.owner_agent ?? null,
       status: node.state === "waiting" ? "deferred" : node.state === "blocked" || node.state === "done" ? node.state : "open",
       taskDomain: node.task_domain ?? null, taskClass: node.kind === "monitor" ? "continuous_monitor" : null,
     };
-    return { kind: "todo", ...(currentTodo ? {} : { projectedFrom: "goal_work_map" as const }), item: { ...todo, goalId: goal.goalId, goalTitle: goal.title, ownerLabel: todo.claimedBy } };
+    return { kind: "todo", projectedFrom: "goal_work_map", item: { ...todo, goalId: goal.goalId, goalTitle: goal.title, ownerLabel: todo.claimedBy } };
   }
   function download() {
     if (!snapshot || !usable) return;
