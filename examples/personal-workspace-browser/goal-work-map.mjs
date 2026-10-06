@@ -96,6 +96,8 @@ export const goalWorkMapScenario = {
     const drawer = page.getByRole("dialog", { name: "Todo 详情" });
     await drawer.getByRole("heading", { name: "Reserve the hall" }).waitFor();
     assert.match(await drawer.innerText(), /logistics/);
+    assert.ok(!desktop.api.todoRequestReads.some(({ todoId }) => todoId === "todo_map_reserve"), "An unloaded work-map task opens with projected facts only");
+    assert.equal(await drawer.getByRole("button", { name: "标记完成" }).count(), 0, "Projected task facts do not enable Todo mutations");
     await page.getByRole("button", { name: /关闭详情/ }).click();
     assert.equal(await canvas.locator('.work-map-node[aria-pressed="true"] strong').innerText(), "Reserve the hall", "Closing details returns to the same selection");
 

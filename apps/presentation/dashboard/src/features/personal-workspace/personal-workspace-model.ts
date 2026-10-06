@@ -456,7 +456,7 @@ export type WorkspaceAgentOption = {
 export type WorkspaceDrawerSelection =
   | { item: WorkspaceAttention; kind: "attention" }
   | { item: WorkspaceGoal; kind: "goal" }
-  | { item: WorkspaceTodo; kind: "todo" }
+  | { item: WorkspaceTodo; kind: "todo"; projectedFrom?: "goal_work_map" }
   | { item: WorkspaceRun; kind: "run" }
   | { item: WorkspaceOutput; kind: "output" }
   | { item: WorkspaceActionPreview; kind: "proposal" }
