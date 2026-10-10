@@ -526,3 +526,18 @@ def test_trusted_release_ref_matches_manifest_repository(tmp_path: Path) -> None
         )
         is None
     )
+
+
+def test_doctor_git_handles_timeout(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from loopx.doctor_git import git_metadata_for_root
+
+    def fake_run(*args, **kwargs):
+        raise subprocess.TimeoutExpired(cmd=args[0], timeout=0.1)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    meta = git_metadata_for_root(tmp_path)
+    assert meta["git_commit"] is None
+    assert meta["git_ref"] is None
+    assert meta["git_dirty"] is None
+    assert git_revision_relation(tmp_path, installed_commit="a", comparison_commit="b").value == "unknown"
+    assert trusted_release_ref_for_root(tmp_path, repository="loopx/loopx", ref="main") is None

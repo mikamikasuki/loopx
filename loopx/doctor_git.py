@@ -46,8 +46,9 @@ def git_metadata_for_root(root: Path | None) -> dict[str, Any]:
                 text=True,
                 encoding="utf-8",
                 errors="replace",
+                timeout=30.0,
             )
-        except OSError:
+        except (OSError, subprocess.TimeoutExpired):
             return None
         if result.returncode != 0:
             return None
@@ -112,8 +113,9 @@ def git_revision_relation(
                 text=True,
                 encoding="utf-8",
                 errors="replace",
+                timeout=30.0,
             )
-        except OSError:
+        except (OSError, subprocess.TimeoutExpired):
             return None
         if result.returncode == 0:
             return True
@@ -168,8 +170,9 @@ def trusted_release_ref_for_root(
             text=True,
             encoding="utf-8",
             errors="replace",
+            timeout=30.0,
         )
-    except OSError:
+    except (OSError, subprocess.TimeoutExpired):
         return None
     if remotes.returncode != 0:
         return None
@@ -186,8 +189,9 @@ def trusted_release_ref_for_root(
                 text=True,
                 encoding="utf-8",
                 errors="replace",
+                timeout=30.0,
             )
-        except OSError:
+        except (OSError, subprocess.TimeoutExpired):
             continue
         if (
             remote_url.returncode != 0
@@ -196,21 +200,25 @@ def trusted_release_ref_for_root(
         ):
             continue
         trusted_ref = f"refs/remotes/{remote}/{expected_ref}"
-        resolved = subprocess.run(
-            [
-                "git",
-                "-C",
-                str(source_root),
-                "rev-parse",
-                "--verify",
-                f"{trusted_ref}^{{commit}}",
-            ],
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-        )
+        try:
+            resolved = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(source_root),
+                    "rev-parse",
+                    "--verify",
+                    f"{trusted_ref}^{{commit}}",
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=30.0,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            continue
         commit = resolved.stdout.strip() if resolved.returncode == 0 else ""
         if commit:
             return {
